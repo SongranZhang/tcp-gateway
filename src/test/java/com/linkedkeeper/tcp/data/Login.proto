@@ -1,0 +1,60 @@
+message MessageBufPro {
+    enum ProtocolField {
+        HEART_BEAT = 0; 
+		NOTIFY_HAS_MESSAGE = 2;
+		ORIGINAL_MESSAGE =3;
+    }
+    enum CMD {
+        CONNECT = 10000;
+		CLOSE = 10001;
+		HEARTBEAT = 10002;
+		SEND = 11000;
+    }
+    enum EncryptField {
+        TRUE = 1;
+		FALSE = 0;
+    }
+    enum CodeField {
+        SUCCESS = 1;
+		FAILURE = 0;
+    }
+    message MessageReq {
+		required string method = 1;
+		required string token = 2;
+		required string sign = 3;
+		required string time = 4;
+		required string v = 5;
+		required string param = 6;
+        required CMD cmd = 7;
+        required string device = 8;
+        required string app = 9;
+    }
+    message MessageResp {
+		required CodeField code = 1;
+        required ProtocolField protocol = 2;
+		required EncryptField encrypt = 3;
+		optional string notice = 4;
+		optional MessageBody body = 5;
+		required CMD cmd = 6;
+		required float time = 7;
+		required string callback = 8;
+		required string msg = 9;
+    }
+    message MessageBody {
+        required int32 source = 41;
+		required MessageForm form = 42;
+		required MessageContent content = 43;
+    }
+    message MessageForm {
+		required string source = 421;
+		required string type = 422;
+    }
+    message MessageContent {
+        required float id = 431;
+		required string title = 432;
+		required string content = 433;
+		required string time = 434;
+		required string extend1 = 435;
+		required string extend2 = 436;
+    }
+}

@@ -30,9 +30,19 @@
 
 package com.linkedkeeper.tcp.connector.tcp.server;
 
-import com.linkedkeeper.tcp.exception.PushException;
+import com.linkedkeeper.tcp.connector.tcp.config.ServerTransportConfig;
+import com.linkedkeeper.tcp.exception.InitErrorException;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by frank@linkedkeeper.com on 2017/2/25.
@@ -41,29 +51,71 @@ public class TcpServer {
 
     private final static Logger logger = LoggerFactory.getLogger(TcpServer.class);
 
+    private ServerTransportConfig serverConfig;
+
     private int port;
 
-    private static int i = 0;
+    private static final int BIZ_GROUP_SIZE = Runtime.getRuntime().availableProcessors() * 2;
+    private static final int BIZ_THREAD_SIZE = 4;
 
-    private static final PushException NOT_CONNECTED_EXCEPTION = new PushException();
+    private final EventLoopGroup boosGroup = new NioEventLoopGroup(BIZ_GROUP_SIZE);
+    private final EventLoopGroup workerGroup = new NioEventLoopGroup(BIZ_THREAD_SIZE);
 
     public void init() throws Exception {
         boolean flag = Boolean.FALSE;
         logger.info("start tcp server ...");
 
-        if (i > 0)
-            throw new Exception("start tcp server failure.");
+        Class clazz = NioServerSocketChannel.class;
+        // Server 服务启动
+        ServerBootstrap bootstrap = new ServerBootstrap();
 
-        i++;
+        bootstrap.group(boosGroup, workerGroup);
+        bootstrap.channel(clazz);
+        bootstrap.childHandler(new ServerChannelInitializer(serverConfig));
+        // 可选参数
+        bootstrap.childOption(ChannelOption.WRITE_BUFFER_HIGH_WATER_MARK, 32 * 1024);
+
+        // 绑定接口，同步等待成功
+        logger.info("start tcp server at port[" + port + "].");
+        ChannelFuture future = bootstrap.bind(port).sync();
+        ChannelFuture channelFuture = future.addListener(new ChannelFutureListener() {
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if (future.isSuccess()) {
+                    logger.info("Server have success bind to " + port);
+                } else {
+                    logger.error("Server fail bind to " + port);
+                    throw new InitErrorException("Server start fail !", future.cause());
+                }
+            }
+        });
+
+        try {
+            channelFuture.await(5000, TimeUnit.MILLISECONDS);
+            if (channelFuture.isSuccess()) {
+                flag = Boolean.TRUE;
+            }
+
+        } catch (InterruptedException e) {
+            logger.error("TcpServer init occur InterruptedException!", e);
+        }
+
+        logger.info("start tcp server " + flag);
     }
-
 
     public void shutdown() {
-
+        logger.info("shutdown tcp server ...");
+        // 释放线程池资源
+        boosGroup.shutdownGracefully();
+        workerGroup.shutdownGracefully();
+        logger.info("shutdown tcp server end.");
     }
 
-
     //------------------ set && get --------------------
+
+
+    public void setServerConfig(ServerTransportConfig serverConfig) {
+        this.serverConfig = serverConfig;
+    }
 
     public void setPort(int port) {
         this.port = port;

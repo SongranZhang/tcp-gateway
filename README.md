@@ -114,6 +114,11 @@ body is byte type, and it also a protobuf bytes.
 ## Tcp Client 
 support iOS, android, C++ languages 
 ### Serialize protobuf
+#### java
 ```bat 
 /protobuf/protoc --proto_path=/protobuf/ --java_out=/protobuf/MessageBuf.proto
+```
+#### object-c
+```bat 
+protoc --plugin=/protobuf/protoc-gen-objc MessageBuf.proto --object_out="/protobuf/"
 ```

@@ -6,7 +6,7 @@ Clone this repository, and add it as a dependent maven project.
 
 # Usage
 ## Create a Tcp Server
-### Config spring-tcp-server.xml
+### Config spring-tcp-server.xml to start server
 ```xml 
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -55,12 +55,52 @@ Clone this repository, and add it as a dependent maven project.
     <bean id="proxy" class="com.linkedkeeper.tcp.server.TestSimpleProxy"/>
 </beans>
 ```
-tcpServer: provide tcp connection service.
-tcpSessionManager: you can add listener to listen session event, include session create, destroy and so on.
-logSessionListener: it is related tcpSessionManager, those listener should implements SessionListener.
-tcpSender: it is a container that can send message to client from server.
-serverConfig: it is combine the config.
-tcpConnector: it is container that manage the connection between server and client.
-notifyProxy: it is proxy that implement send notify to client.
+* tcpServer: provide tcp connection service.
+* tcpSessionManager: you can add listener to listen session event, include session create, destroy and so on.
+* logSessionListener: it is related tcpSessionManager, those listener should implements SessionListener.
+* tcpSender: it is a container that can send message to client from server.
+* serverConfig: it is combine the config.
+* tcpConnector: it is container that manage the connection between server and client.
+* notifyProxy: it is proxy that implement send notify to client.
 
-testSimpleProxy: this proxy is your proxy that can receive message from client.
+Above config is default, you can don't modify.
+### Create Test Proxy to receive message from client
+```java 
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.linkedkeeper.tcp.connector.tcp.codec.MessageBuf;
+import com.linkedkeeper.tcp.data.Login;
+import com.linkedkeeper.tcp.data.Protocol;
+import com.linkedkeeper.tcp.invoke.ApiProxy;
+import com.linkedkeeper.tcp.message.MessageWrapper;
+import com.linkedkeeper.tcp.message.SystemMessage;
+
+public class TestSimpleProxy implements ApiProxy {
+
+    public MessageWrapper invoke(SystemMessage sMsg, MessageBuf.JMTransfer message) {
+        ByteString body = message.getBody();
+
+        if (message.getCmd() == 1000) {
+            try {
+                Login.MessageBufPro.MessageReq messageReq = Login.MessageBufPro.MessageReq.parseFrom(body);
+                if (messageReq.getCmd().equals(Login.MessageBufPro.CMD.CONNECT)) {
+                    return new MessageWrapper(MessageWrapper.MessageProtocol.CONNECT, message.getToken(), null);
+                }
+            } catch (InvalidProtocolBufferException e) {
+                e.printStackTrace();
+            }
+        } else if (message.getCmd() == 1002) {
+            try {
+                Login.MessageBufPro.MessageReq messageReq = Login.MessageBufPro.MessageReq.parseFrom(body);
+                if (messageReq.getCmd().equals(Login.MessageBufPro.CMD.HEARTBEAT)) {
+                    MessageBuf.JMTransfer.Builder resp = Protocol.generateHeartbeat();
+                    return new MessageWrapper(MessageWrapper.MessageProtocol.HEART_BEAT, message.getToken(), resp);
+                }
+            } catch (InvalidProtocolBufferException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+}
+```

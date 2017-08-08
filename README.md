@@ -122,3 +122,5 @@ support iOS, android, C++ languages
 ```bat 
 protoc --plugin=/protobuf/protoc-gen-objc MessageBuf.proto --object_out="/protobuf/"
 ```
+
+Notes. You can add qq group to download protobuf compiler

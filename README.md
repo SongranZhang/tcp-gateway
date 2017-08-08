@@ -104,10 +104,16 @@ public class TestSimpleProxy implements ApiProxy {
     }
 }
 ```
-####Input Parameters:
+#### Input Parameters:
 * SystemMessage: the message get from tcp server, include remoteAddress, localAddress.
 * MessageBuf.JMTransfer: this is important, this class is created by protobuf, it include header and body, header is app information, you can get the detail from this project.
-####Output Parameter:
+#### Output Parameter:
 * MessageWrapper: it is message response wrapper. It include protocol, sessionId and body. Body is response data.
 
 body is byte type, and it also a protobuf bytes.
+## Tcp Client 
+support iOS, android, C++ languages 
+### Serialize protobuf
+```bat 
+/protobuf/protoc --proto_path=/protobuf/ --java_out=/protobuf/MessageBuf.proto
+```

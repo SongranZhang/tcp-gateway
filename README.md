@@ -23,7 +23,7 @@ Clone this repository, and add it as a dependent maven project.
     </bean>
     <bean id="tcpSessionManager" class="com.linkedkeeper.tcp.connector.tcp.TcpSessionManager">
         <property name="maxInactiveInterval" value="500"/>
-        <!-- you can add listener to listen session event, include session create, destory and so on. -->
+        <!-- you can add listener to listen session event, include session create, destroy and so on. -->
         <property name="sessionListeners">
             <list>
                 <ref bean="logSessionListener"/>
@@ -42,7 +42,7 @@ Clone this repository, and add it as a dependent maven project.
         <constructor-arg ref="proxy"/>
         <constructor-arg ref="notify"/>
     </bean>
-    <!-- tcp connector is contianer that manage the connection between server and client -->
+    <!-- tcp connector is container that manage the connection between server and client -->
     <bean id="tcpConnector" class="com.linkedkeeper.tcp.connector.tcp.TcpConnector" init-method="init"
           destroy-method="destroy"/>
     <!-- notify proxy is proxy that implement send notify to client -->
@@ -51,7 +51,16 @@ Clone this repository, and add it as a dependent maven project.
     </bean>
     <!-- default tcp server config end. -->
     
-    <!-- this proxy is your proxy that can recevie message from client -->
+    <!-- this proxy is your proxy that can receive message from client -->
     <bean id="proxy" class="com.linkedkeeper.tcp.server.TestSimpleProxy"/>
 </beans>
 ```
+tcpServer: provide tcp connection service.
+tcpSessionManager: you can add listener to listen session event, include session create, destroy and so on.
+logSessionListener: it is related tcpSessionManager, those listener should implements SessionListener.
+tcpSender: it is a container that can send message to client from server.
+serverConfig: it is combine the config.
+tcpConnector: it is container that manage the connection between server and client.
+notifyProxy: it is proxy that implement send notify to client.
+
+testSimpleProxy: this proxy is your proxy that can receive message from client.

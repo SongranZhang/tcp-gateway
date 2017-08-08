@@ -57,13 +57,13 @@ Clone this repository, and add it as a dependent maven project.
 ```
 * tcpServer: provide tcp connection service.
 * tcpSessionManager: you can add listener to listen session event, include session create, destroy and so on.
-* logSessionListener: it is related tcpSessionManager, those listener should implements SessionListener.
+* logSessionListener: it is related tcpSessionManager, those listener should implement SessionListener.
 * tcpSender: it is a container that can send message to client from server.
 * serverConfig: it is combine the config.
 * tcpConnector: it is container that manage the connection between server and client.
 * notifyProxy: it is proxy that implement send notify to client.
 
-Above config is default, you can don't modify.
+Above config is default, you don't have to change it. But you can change port.
 ### Create Test Proxy to receive message from client
 ```java 
 import com.google.protobuf.ByteString;
@@ -104,3 +104,10 @@ public class TestSimpleProxy implements ApiProxy {
     }
 }
 ```
+####Input Parameters:
+* SystemMessage: the message get from tcp server, include remoteAddress, localAddress.
+* MessageBuf.JMTransfer: this is important, this class is created by protobuf, it include header and body, header is app information, you can get the detail from this project.
+####Output Parameter:
+* MessageWrapper: it is message response wrapper. It include protocol, sessionId and body. Body is response data.
+
+body is byte type, and it also a protobuf bytes.

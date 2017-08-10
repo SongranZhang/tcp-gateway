@@ -45,6 +45,22 @@ public class TestNotify {
     final int timeout = 10 * 1000;
     final int NOTIFY = 3;
 
+    public boolean send(long seq, String sessionId, int cmd, ByteString body) throws Exception {
+        boolean success = false;
+        MessageBuf.JMTransfer.Builder builder = generateNotify(sessionId, seq, cmd, body);
+        if (builder != null) {
+            MessageWrapper wrapper = new MessageWrapper(MessageWrapper.MessageProtocol.NOTIFY, sessionId, builder);
+            int ret = notify.notify(seq, wrapper, timeout);
+            if (ret == Constants.NOTIFY_SUCCESS) {
+                success = true;
+            } else if (ret == Constants.NOTIFY_NO_SESSION) {
+                /** no session on this machine **/
+                success = true;
+            }
+        }
+        return success;
+    }
+
     /**
      * session
      */
@@ -58,26 +74,6 @@ public class TestNotify {
     final String SIGN = "sign";
 
     final Map<String, Map<String, Object>> testSessionMap = null;
-
-    public boolean send(long seq, String sessionId, int cmd, ByteString body) throws Exception {
-        boolean success = false;
-        MessageBuf.JMTransfer.Builder builder = generateNotify(sessionId, seq, cmd, body);
-        if (builder != null) {
-            MessageWrapper wrapper = new MessageWrapper(MessageWrapper.MessageProtocol.NOTIFY, sessionId, builder);
-            int ret = notify.notify(seq, wrapper, timeout);
-            if (ret == Constants.NOTIFY_SUCCESS) {
-                success = true;
-            } else if (ret == Constants.NOTIFY_NO_SESSION) {
-                /** no session on this machine **/
-                success = true;
-            }
-        } else {
-            /** no session in the cache **/
-            success = true;
-        }
-        return success;
-    }
-
 
     protected MessageBuf.JMTransfer.Builder generateNotify(String sessionId, long seq, int cmd, ByteString body) throws Exception {
         Map<String, Object> map = testSessionMap.get(sessionId);
@@ -99,5 +95,4 @@ public class TestNotify {
 
         return builder;
     }
-
 }

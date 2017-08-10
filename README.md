@@ -117,23 +117,6 @@ private NotifyProxy notify;
 final int timeout = 10 * 1000;
 final int NOTIFY = 3;
 
-/**
- * session
- */
-final String VERSION = "version";
-final String DEVICE_ID = "deviceId";
-final String PLATFORM = "platform";
-final String PLATFORM_VERSION = "platformVersion";
-final String TOKEN = "token";
-final String APP_KEY = "appKey";
-final String TIMESTAMP = "timestamp";
-final String SIGN = "sign";
-
-/**
- * need session into redis, then when you notify you can get info from redis by session
- */
-final Map<String, Map<String, Object>> testSessionMap = null;
-
 public boolean send(long seq, String sessionId, int cmd, ByteString body) throws Exception {
     boolean success = false;
     MessageBuf.JMTransfer.Builder builder = generateNotify(sessionId, seq, cmd, body);
@@ -152,6 +135,23 @@ public boolean send(long seq, String sessionId, int cmd, ByteString body) throws
     }
     return success;
 }
+
+/**
+ * session
+ */
+final String VERSION = "version";
+final String DEVICE_ID = "deviceId";
+final String PLATFORM = "platform";
+final String PLATFORM_VERSION = "platformVersion";
+final String TOKEN = "token";
+final String APP_KEY = "appKey";
+final String TIMESTAMP = "timestamp";
+final String SIGN = "sign";
+
+/**
+ * need session into redis, then when you notify you can get info from redis by session
+ */
+final Map<String, Map<String, Object>> testSessionMap = null;
 
 protected MessageBuf.JMTransfer.Builder generateNotify(String sessionId, long seq, int cmd, ByteString body) throws Exception {
     Map<String, Object> map = testSessionMap.get(sessionId);
@@ -186,4 +186,4 @@ support iOS, android, C++ languages
 protoc --plugin=/protobuf/protoc-gen-objc MessageBuf.proto --object_out="/protobuf/"
 ```
 
-Notes. You can add qq group to download protobuf compiler
+Notes. You can add QQ group to download protobuf compiler

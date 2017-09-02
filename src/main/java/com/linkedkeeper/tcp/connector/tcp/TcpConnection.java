@@ -34,7 +34,9 @@ import com.linkedkeeper.tcp.connector.api.ExchangeConnection;
 import com.linkedkeeper.tcp.exception.LostConnectException;
 import com.linkedkeeper.tcp.exception.PushException;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +73,36 @@ public class TcpConnection<T> extends ExchangeConnection<T> {
             this.fireError(e);
             return;
         }
-        pushMessage(message);
+        pushMessage0(message);
+    }
+
+    private void pushMessage0(T message) {
+        try {
+            ChannelFuture cf = cxt.writeAndFlush(message);
+            cf.addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws PushException {
+                    if (future.isSuccess()) {
+                        logger.debug("send success.");
+                    } else {
+                        throw new PushException("Failed to send message.");
+                    }
+                    Throwable cause = future.cause();
+                    if (cause != null) {
+                        throw new PushException(cause);
+                    }
+                }
+            });
+        } catch (LostConnectException e) {
+            logger.error("TcpConnection pushMessage occur LostConnectException.", e);
+            this.fireError(new PushException(e));
+        } catch (Exception e) {
+            logger.error("TcpConnection pushMessage occur Exception.", e);
+            this.fireError(new PushException("ChannelFuture " + connectionId + " ", e));
+        } catch (Throwable e) {
+            logger.error("TcpConnection pushMessage occur Throwable.", e);
+            this.fireError(new PushException("Failed to send message, cause: " + e.getMessage(), e));
+        }
     }
 
     private void pushMessage(T message) {

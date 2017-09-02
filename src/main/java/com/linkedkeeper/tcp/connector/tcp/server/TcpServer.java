@@ -88,18 +88,6 @@ public class TcpServer {
                 }
             }
         });
-
-        try {
-            channelFuture.await(5000, TimeUnit.MILLISECONDS);
-            if (channelFuture.isSuccess()) {
-                flag = Boolean.TRUE;
-            }
-
-        } catch (InterruptedException e) {
-            logger.error("TcpServer init occur InterruptedException!", e);
-        }
-
-        logger.info("start tcp server " + flag);
     }
 
     public void shutdown() {

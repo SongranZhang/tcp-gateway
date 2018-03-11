@@ -58,7 +58,7 @@ public class TcpServer {
     private static final int BIZ_GROUP_SIZE = Runtime.getRuntime().availableProcessors() * 2;
     private static final int BIZ_THREAD_SIZE = 4;
 
-    private final EventLoopGroup boosGroup = new NioEventLoopGroup(BIZ_GROUP_SIZE);
+    private final EventLoopGroup bossGroup = new NioEventLoopGroup(BIZ_GROUP_SIZE);
     private final EventLoopGroup workerGroup = new NioEventLoopGroup(BIZ_THREAD_SIZE);
 
     public void init() throws Exception {
@@ -69,7 +69,7 @@ public class TcpServer {
         // Server 服务启动
         ServerBootstrap bootstrap = new ServerBootstrap();
 
-        bootstrap.group(boosGroup, workerGroup);
+        bootstrap.group(bossGroup, workerGroup);
         bootstrap.channel(clazz);
         bootstrap.childHandler(new ServerChannelInitializer(serverConfig));
         // 可选参数
@@ -93,7 +93,7 @@ public class TcpServer {
     public void shutdown() {
         logger.info("shutdown tcp server ...");
         // 释放线程池资源
-        boosGroup.shutdownGracefully();
+        bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
         logger.info("shutdown tcp server end.");
     }
